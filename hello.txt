@@ -1,0 +1,6 @@
+Site: facebook.com|Password: MySecretLol
+Site: google.com|Password: MySecretLol
+Site: youtube|Password: MySecretLol
+Site: reddit.com|Password: someRandomPass
+Site: random.in|Password: someRandom
+Site: github.com|Password: parth@93077

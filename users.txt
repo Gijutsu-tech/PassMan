@@ -1,2 +1,1 @@
-Username: parth|Password: parth@123
-Username: parthMom|Password: IAmMom
+parth:parth123

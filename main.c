@@ -27,7 +27,7 @@ int main(){
     user loggedUser;
 
     loginUser(&loggedUser);
-
+    
     printf("Welcome to password manager!\n\n");
 
     printf("1. Register a user\n");
@@ -35,6 +35,7 @@ int main(){
     printf("3. Search a password\n");
     printf("Enter your choice: ");
     scanf("%d", &choice);
+    clrBuffer();
     switch (choice)
     {
     case 1:
@@ -62,7 +63,6 @@ int createPassForm(user loggedUser){
     passForm newForm;
     char path[250];
 
-    clrBuffer();
     printf("Enter the website: ");
     fgets(newForm.siteName, sizeof(newForm.siteName), stdin);
 
@@ -94,7 +94,6 @@ int searchSites(user loggedUser){
     char path[250];
     int found = 0; // To make future implications based on this
 
-    clrBuffer();
     printf("Enter the website: ");
     fgets(searchSite, sizeof(searchSite), stdin);
     searchSite[strcspn(searchSite, "\n")] = 0;
@@ -123,7 +122,6 @@ int registerUser(void){
     user newUser;
     char cmd[100];
 
-    clrBuffer();
     printf("Username: ");
     fgets(newUser.userName, sizeof(newUser.userName), stdin);
     printf("Password (Remember this!): ");
@@ -138,7 +136,7 @@ int registerUser(void){
     system(cmd);
 
     file = fopen("./users.txt", "a");
-    fprintf(file, "Username: %s|Password: %s\n", newUser.userName, newUser.masterPasswd);
+    fprintf(file, "%s:%s\n", newUser.userName, newUser.masterPasswd);
     fclose(file);
 }
 
@@ -148,26 +146,48 @@ int loginUser(user *loggedUser){
     char searchUser[50];
     char searchPasswd[100];
     char searchLine[200];
-    char line[200];
     int userExists = 1;
+    char fileUser[50];
+    char filePasswd[100];
 
+    file = fopen("./users.txt", "r");
+
+    // check if file is empty-
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+
+    // Call registerUser() if the file is empty
+    if (size == 0)
+    {
+        printf("No users found. Register a new user below!\n");
+        registerUser();
+        fclose(file);
+    }
+
+    rewind(file);
+    
+    // Login interface
     printf("Login: \n");
-
     printf("Username: ");
     fgets(searchUser, sizeof(searchUser), stdin);
     printf("Password: ");
     fgets(searchPasswd, sizeof(searchPasswd), stdin);
 
+    // Remove trailing \n
     searchUser[strcspn(searchUser, "\n")] = 0;
     searchPasswd[strcspn(searchPasswd, "\n")] = 0;
 
-    file = fopen("./users.txt", "r");
+    // Search for matches in every line
     while (fgets(searchLine, sizeof(searchLine), file)) {
-        if (strstr(searchLine, searchUser) != NULL) {
-            strcpy(line, searchLine);
+
+        sscanf(searchLine, "%[^:]:%[^\n]", fileUser, filePasswd); // %[^:] Reads everthing till semicolon and store in fileUser and :%s reads everything after a semicolon and stops before \n
+
+        // Compare the usernames and passwds to check if they match
+        if (strcmp(fileUser, searchUser) == 0) {
             userExists = 0;
-            if (strstr(searchLine, searchPasswd) != NULL)
+            if (strcmp(filePasswd, searchPasswd) == 0)
             {
+                // Copy username and password to loggedUser struct
                 strcpy(loggedUser->userName, searchUser);
                 strcpy(loggedUser->masterPasswd, searchPasswd);
 
